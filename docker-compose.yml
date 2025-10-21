@@ -1,0 +1,37 @@
+services:
+  backend:
+    build: ./myapi   
+    container_name: myapi
+    networks:
+      - my-network
+    depends_on:
+      - database
+
+  database:
+    build: ./mydatabase
+    container_name: mydatabase
+    environment:
+      - POSTGRES_DB=db
+      - POSTGRES_USER=usr
+      - POSTGRES_PASSWORD=pwd
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - my-network
+
+  httpd:
+    build: ./myhttpcontainer
+    container_name: myhttpcontainer
+    ports:
+      - "80:80"
+    networks:
+      - my-network
+    depends_on:
+      - backend
+
+networks:
+  my-network:
+    driver: bridge
+
+volumes:
+  pgdata:
