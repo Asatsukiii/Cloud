@@ -24,4 +24,5 @@ jobs:
 
       # Step 3: Build and test with Maven
       - name: Build and test with Maven
+        working-directory: myapi
         run: mvn clean verify
