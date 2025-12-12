@@ -11,7 +11,7 @@
     ssh_source_prefix: "20.19.255.17/32"
   tasks:
     - name: Ensure NSG has SSH allow rule
-      azure.azcollection.azure_rm_securitygroup:
+      azure_rm_securitygroup:
         resource_group: "{{ rg_name }}"
         name: "{{ nsg_name }}"
         security_rules:
