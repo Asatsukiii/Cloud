@@ -5,7 +5,7 @@
   become: yes
   vars:
     ansible_ssh_pass: "P@ssw0rd2025!"
-    docker_image: "evilroot/docker-2048"
+    docker_image: "agrawpri/2048-docker"
     container_name: "docker-2048"
     exposed_port: 8080   # port sur la VM
 
@@ -30,6 +30,6 @@
         state: started
         restart_policy: always
         published_ports:
-          - "8080:80"
+          - "80:80"
 
 

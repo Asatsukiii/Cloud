@@ -9,7 +9,7 @@
   vars:
     rg_name: myResourceGroup
     nsg_name: myNetworkSecurityGroup
-    ssh_source_prefix: "20.19.255.17/32"
+
 
   tasks:
     - name: Ensure NSG rules exist for 80 and 8080
@@ -21,7 +21,6 @@
             protocol: Tcp
             access: Allow
             direction: Inbound
-            source_address_prefix: "{{ ssh_source_prefix }}"
             destination_address_prefix: "*"
             source_port_range: "*"
             destination_port_range: 80
@@ -31,7 +30,6 @@
             protocol: Tcp
             access: Allow
             direction: Inbound
-            source_address_prefix: "{{ ssh_source_prefix }}"
             destination_address_prefix: "*"
             source_port_range: "*"
             destination_port_range: 8080
