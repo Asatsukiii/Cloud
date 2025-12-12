@@ -1,49 +1,61 @@
-- name: Déploiement du projet Cloud sur la VM Azure
-  hosts: all
-  become: yes
-
+---
+- name: Ensure NSG allows SSH and wait for VM SSH to be reachable
+  hosts: localhost
+  connection: local
+  collections:
+    - azure.azcollection
   vars:
+    rg_name: myResourceGroup
+    nsg_name: myNetworkSecurityGroup
+    public_ip: "20.19.255.17"
+    ssh_source_prefix: "20.19.255.17/32"
+  tasks:
+    - name: Ensure NSG has SSH allow rule
+      azure.azcollection.azure_rm_securitygroup:
+        resource_group: "{{ rg_name }}"
+        name: "{{ nsg_name }}"
+        security_rules:
+          - name: Allow-SSH-From-Anywhere
+            priority: 1000
+            protocol: Tcp
+            access: Allow
+            direction: Inbound
+            source_address_prefix: "{{ ssh_source_prefix }}"
+            destination_address_prefix: '*'
+            source_port_range: '*'
+            destination_port_range: '22'
+
+    - name: Wait for SSH TCP port 22 to be reachable
+      wait_for:
+        host: "{{ public_ip }}"
+        port: 22
+        timeout: 240
+        state: started
+
+- name: Deploy Cloud app on the VM (calls the existing deploy playbook)
+  hosts: "{{ public_ip }}"   # on se connecte directement à l'IP publique
+  gather_facts: yes
+  remote_user: azureuser
+  become: yes
+  vars:
+    ansible_ssh_pass: "P@ssw0rd2025!"
     repo_url: "https://github.com/Asatsukiii/Cloud.git"
     project_dir: "/home/azureuser/Cloud"
-    ansible_ssh_user: azureuser
-    ansible_ssh_pass: "P@ssw0rd2025!"
-
   tasks:
-
-    - name: Mettre à jour les paquets
+    - name: Installer dépendances & Docker (simplifié)
       apt:
         update_cache: yes
-        upgrade: yes
-
-    - name: Installer dépendances requises
-      apt:
         name:
           - git
           - curl
           - ca-certificates
           - gnupg
           - lsb-release
-        state: present
-
-    - name: Ajouter clé GPG Docker
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-
-    - name: Ajouter dépôt Docker APT
-      apt_repository:
-        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-        state: present
-
-    - name: Installer Docker + Docker Compose
-      apt:
-        name:
           - docker-ce
           - docker-ce-cli
           - containerd.io
           - docker-compose-plugin
         state: present
-        update_cache: yes
 
     - name: Ajouter azureuser au groupe docker
       user:
