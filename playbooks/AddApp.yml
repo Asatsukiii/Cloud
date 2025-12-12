@@ -33,7 +33,7 @@
         state: started
 
 - name: Deploy Cloud app on the VM (calls the existing deploy playbook)
-  hosts: "{{ public_ip }}"   # on se connecte directement à l'IP publique
+  hosts: 20.19.255.17  # on se connecte directement à l'IP publique
   gather_facts: yes
   remote_user: azureuser
   become: yes
