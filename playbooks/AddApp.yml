@@ -1,0 +1,64 @@
+- name: Déploiement du projet Cloud sur la VM Azure
+  hosts: all
+  become: yes
+
+  vars:
+    repo_url: "https://github.com/Asatsukiii/Cloud.git"
+    project_dir: "/home/azureuser/Cloud"
+    ansible_ssh_user: azureuser
+    ansible_ssh_pass: "P@ssw0rd2025!"
+
+  tasks:
+
+    - name: Mettre à jour les paquets
+      apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Installer dépendances requises
+      apt:
+        name:
+          - git
+          - curl
+          - ca-certificates
+          - gnupg
+          - lsb-release
+        state: present
+
+    - name: Ajouter clé GPG Docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Ajouter dépôt Docker APT
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Installer Docker + Docker Compose
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Ajouter azureuser au groupe docker
+      user:
+        name: azureuser
+        groups: docker
+        append: yes
+
+    - name: Cloner le dépôt GitHub
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ project_dir }}"
+        version: main
+        force: yes
+
+    - name: Lancer les conteneurs Docker
+      command: docker compose up -d
+      args:
+        chdir: "{{ project_dir }}"
