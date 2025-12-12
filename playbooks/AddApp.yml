@@ -1,36 +1,33 @@
 ---
-- name: Deploy Cloud app on the VM (calls the existing deploy playbook)
-  hosts: all  # on se connecte directement à l'IP publique
+- name: Deploy 2048 Docker container on the VM
+  hosts: all
   gather_facts: yes
   become: yes
   vars:
     ansible_ssh_pass: "P@ssw0rd2025!"
-    repo_url: "https://github.com/Asatsukiii/Cloud.git"
-    project_dir: "/home/azureuser/Cloud"
+    docker_image: "evilroot/docker-2048"
+    container_name: "docker-2048"
+    exposed_port: 8080   # port sur la VM
+
   tasks:
-    - name: Installer dépendances & Docker (simplifié)
+    - name: Installer Docker
       apt:
         update_cache: yes
         name:
-          - git
-          - curl
           - docker.io
         state: present
 
-    - name: Ajouter azureuser au groupe docker
-      user:
-        name: azureuser
-        groups: docker
-        append: yes
 
-    - name: Cloner le dépôt GitHub
-      git:
-        repo: "{{ repo_url }}"
-        dest: "{{ project_dir }}"
-        version: main
-        force: yes
+    - name: Pull de l'image Docker 2048
+      community.docker.docker_image:
+        name: "{{ docker_image }}"
+        source: pull
 
-    - name: Lancer les conteneurs Docker
-      command: docker compose up -d
-      args:
-        chdir: "{{ project_dir }}"
+    - name: Lancer le container Docker 2048
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ docker_image }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ exposed_port }}:80:80"
