@@ -14,11 +14,7 @@
         name:
           - git
           - curl
-          - ca-certificates
-          - gnupg
-          - lsb-release
-          - docker-ce
-          - docker-ce-cli
+          - docker.io
           - containerd.io
           - docker-compose-plugin
         state: present
