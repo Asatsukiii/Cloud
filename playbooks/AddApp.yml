@@ -30,4 +30,7 @@
         state: started
         restart_policy: always
         published_ports:
-          - "{{ exposed_port }}:80:80"
+          - published: 8080
+            target: 80
+            host_ip: 0.0.0.0
+
