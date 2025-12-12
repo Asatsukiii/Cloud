@@ -15,7 +15,6 @@
           - git
           - curl
           - docker.io
-          - containerd.io
           - docker-compose-plugin
         state: present
 
