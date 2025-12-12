@@ -1,41 +1,7 @@
 ---
-- name: Ensure NSG allows SSH and wait for VM SSH to be reachable
-  hosts: localhost
-  connection: local
-  collections:
-    - azure.azcollection
-  vars:
-    rg_name: myResourceGroup
-    nsg_name: myNetworkSecurityGroup
-    public_ip: "20.19.255.17"
-    ssh_source_prefix: "20.19.255.17/32"
-  tasks:
-    - name: Ensure NSG has SSH allow rule
-      azure_rm_securitygroup:
-        resource_group: "{{ rg_name }}"
-        name: "{{ nsg_name }}"
-        rules:
-          - name: Allow-SSH-From-Anywhere
-            priority: 1000
-            protocol: Tcp
-            access: Allow
-            direction: Inbound
-            source_address_prefix: "{{ ssh_source_prefix }}"
-            destination_address_prefix: '*'
-            source_port_range: '*'
-            destination_port_range: '22'
-
-    - name: Wait for SSH TCP port 22 to be reachable
-      wait_for:
-        host: "{{ public_ip }}"
-        port: 22
-        timeout: 240
-        state: started
-
 - name: Deploy Cloud app on the VM (calls the existing deploy playbook)
-  hosts: 20.19.255.17  # on se connecte directement à l'IP publique
+  hosts: all  # on se connecte directement à l'IP publique
   gather_facts: yes
-  remote_user: azureuser
   become: yes
   vars:
     ansible_ssh_pass: "P@ssw0rd2025!"
