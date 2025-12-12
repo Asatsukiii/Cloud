@@ -9,26 +9,31 @@
   vars:
     rg_name: myResourceGroup
     nsg_name: myNetworkSecurityGroup
-    ssh_source_prefix: "20.19.255.17/32"  # Pour test. En prod, mettre ton IP /32
-    ports_to_open:
-      - { name: "HTTP", port: 80, priority: 1002 }
-      - { name: "HTTP-ALT", port: 8080, priority: 1003 }
+    ssh_source_prefix: "20.19.255.17/32"
 
   tasks:
     - name: Ensure NSG rules exist for 80 and 8080
       azure.azcollection.azure_rm_securitygroup:
         resource_group: "{{ rg_name }}"
         name: "{{ nsg_name }}"
-        rules: |
-          {% for p in ports_to_open %}
-          - name: "{{ p.name }}"
+        rules:
+          - name: HTTP
             protocol: Tcp
             access: Allow
             direction: Inbound
             source_address_prefix: "{{ ssh_source_prefix }}"
             destination_address_prefix: "*"
             source_port_range: "*"
-            destination_port_range: "{{ p.port }}"
-            priority: "{{ p.priority }}"
-          {% endfor %}
+            destination_port_range: 80
+            priority: 1002
+
+          - name: HTTP-ALT
+            protocol: Tcp
+            access: Allow
+            direction: Inbound
+            source_address_prefix: "{{ ssh_source_prefix }}"
+            destination_address_prefix: "*"
+            source_port_range: "*"
+            destination_port_range: 8080
+            priority: 1003
         state: present
