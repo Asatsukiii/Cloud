@@ -14,7 +14,7 @@
       azure_rm_securitygroup:
         resource_group: "{{ rg_name }}"
         name: "{{ nsg_name }}"
-        security_rules:
+        rules:
           - name: Allow-SSH-From-Anywhere
             priority: 1000
             protocol: Tcp
